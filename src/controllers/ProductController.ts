@@ -1,209 +1,167 @@
 import express from "express";
 import { AuthMiddleware } from "middlewares/AuthMiddleware";
-import { User } from "services/AuthService";
 import { ProductService } from "services/ProductService";
-import { RequestWithBody, RequestWithQuery } from "types/requestTypes";
 import { defaultResponseHandler } from "utils/defaultResponseHandler";
-import { validateVars } from "utils/validations";
-import validator from "validator";
-
-export interface ProductCreateBody {
-    imageURL: string;
-    title: string;
-    description: string;
-    price: number;
-    currency: string;
-    discount: number;
-    user: User;
-}
-
-export interface ProductUpdateBody {
-    id: number;
-    imageURL: string;
-    title: string;
-    description: string;
-    price: number;
-    currency: string;
-    discount: number;
-    productURL: string;
-    user: User;
-}
-
-export interface ProductSelectQuery {
-    id: string;
-}
-export interface ProductsSelectQuery {
-    start: string;
-    count: string;
-}
-export interface ProductDeleteBody {
-    id: number;
-}
+import { z } from "zod";
 
 const ProductRouter = express.Router();
-ProductRouter.post(
-    "/create",
-    AuthMiddleware,
-    async function (req: RequestWithBody<ProductCreateBody>, res, next) {
-        const {
-            imageURL,
+ProductRouter.post("/create", AuthMiddleware, async function (req, res, next) {
+    const {
+        title,
+        description,
+        price,
+        currency,
+        discount,
+        attributes,
+        imagesURL,
+    } = req.body;
+    const user = res.locals.user;
+    defaultResponseHandler({
+        zodSchema: z.object({
+            body: z.object({
+                title: z.string(),
+                description: z.string(),
+                price: z.number(),
+                currency: z.string(),
+                discount: z.number().optional(),
+                attributes: z
+                    .object({
+                        title: z.string(),
+                        value: z.union([z.string(), z.number(), z.boolean()]),
+                    })
+                    .array(),
+                imagesURL: z
+                    .object({
+                        imageURL: z.string(),
+                        miniURL: z.string().optional(),
+                    })
+                    .array(),
+            }),
+        }),
+        getResult: ProductService.createProduct,
+        args: [
+            user.id,
             title,
             description,
             price,
             currency,
             discount,
-            user,
-        } = req.body;
-        if (
-            !validateVars(
-                [
-                    imageURL,
-                    title,
-                    description,
-                    price,
-                    currency,
-                    discount,
-                    user.id,
-                ],
-                [
-                    "string",
-                    "string",
-                    "string",
-                    "number",
-                    "string",
-                    "number",
-                    "number",
-                ]
-            )
-        ) {
-            res.statusCode = 400;
-            res.send("Invalid data");
-            return;
-        }
+            attributes,
+            imagesURL,
+        ],
+        req,
+        res,
+        next,
+    });
+});
 
-        try {
-            const result = ProductService.createProduct(
-                imageURL,
-                title,
-                description,
-                price,
-                currency,
-                discount,
-                user.id
-            );
-            res.statusCode = result.code;
-            res.send(result.data);
-            if (result.code < 400) {
-                next();
-            }
-        } catch (error) {
-            console.error(error);
-            res.statusCode = 500;
-            res.send("Произошла ошибка");
-        }
-    }
-);
+ProductRouter.get("/selectById/:id", async function (req, res, next) {
+    const { id } = req.params;
+    console.log(id);
+    defaultResponseHandler({
+        zodSchema: z.object({
+            params: z.object({
+                id: z.coerce.number().int(),
+            }),
+        }),
+        getResult: ProductService.selectById,
+        args: [id],
+        req,
+        res,
+        next,
+    });
+});
 
-ProductRouter.get(
-    "/selectById",
-    async function (req: RequestWithQuery<ProductSelectQuery>, res, next) {
-        const { id } = req.query;
+ProductRouter.get("/selectList", async function (req, res, next) {
+    const { start, count } = req.query;
+    defaultResponseHandler({
+        zodSchema: z.object({
+            query: z.object({
+                start: z.coerce.number().int(),
+                count: z.coerce.number().int(),
+            }),
+        }),
+        getResult: ProductService.selectList,
+        args: [Number(start), Number(count)],
+        req,
+        res,
+        next,
+    });
+});
 
-        defaultResponseHandler({
-            getResult: ProductService.selectById,
-            args: [Number(id)],
-            res,
-            next,
-            validators: [validator.isNumeric(id)],
-        });
-    }
-);
-
-ProductRouter.get(
-    "/selectList",
-    async function (req: RequestWithQuery<ProductsSelectQuery>, res, next) {
-        const { start, count } = req.query;
-        defaultResponseHandler({
-            getResult: ProductService.selectList,
-            args: [Number(start), Number(count)],
-            res,
-            next,
-            validators: [
-                validator.isNumeric(start),
-                validator.isNumeric(count),
-            ],
-        });
-    }
-);
-
-ProductRouter.put(
-    "/update",
-    AuthMiddleware,
-    async function (req: RequestWithBody<ProductUpdateBody>, res, next) {
-        const {
-            imageURL,
-            title,
-            description,
-            price,
-            currency,
-            discount,
+ProductRouter.put("/update", AuthMiddleware, async function (req, res, next) {
+    const {
+        id,
+        title,
+        description,
+        price,
+        currency,
+        discount,
+        attributes,
+        imagesURL,
+    } = req.body;
+    const user = res.locals.user;
+    defaultResponseHandler({
+        zodSchema: z.object({
+            body: z.object({
+                id: z.number(),
+                title: z.string(),
+                description: z.string(),
+                price: z.number(),
+                currency: z.string(),
+                discount: z.number().optional(),
+                attributes: z
+                    .object({
+                        title: z.string(),
+                        value: z.union([z.string(), z.number(), z.boolean()]),
+                    })
+                    .array(),
+                imagesURL: z
+                    .object({
+                        imageURL: z.string(),
+                        miniURL: z.string().optional(),
+                    })
+                    .array(),
+            }),
+        }),
+        getResult: ProductService.update,
+        args: [
             id,
-            user,
-        } = req.body;
-        defaultResponseHandler({
-            getResult: ProductService.update,
-            args: [
-                imageURL,
-                title,
-                description,
-                price,
-                currency,
-                discount,
-                id,
-                user.id,
-            ],
-            res,
-            next,
-            validators: [
-                validateVars(
-                    [
-                        imageURL,
-                        title,
-                        description,
-                        price,
-                        currency,
-                        discount,
-                        id,
-                    ],
-                    [
-                        "string",
-                        "string",
-                        "string",
-                        "number",
-                        "string",
-                        "number",
-                        "number",
-                    ]
-                ),
-            ],
-        });
-    }
-);
+            user.id,
+            title,
+            description,
+            price,
+            currency,
+            discount,
+            attributes,
+            imagesURL,
+        ],
+        req,
+        res,
+        next,
+    });
+});
 
 ProductRouter.post(
-    "/deleteById",
+    "/deleteById/:id",
     AuthMiddleware,
-    async function (req: RequestWithBody<ProductDeleteBody>, res, next) {
-        const { id } = req.body;
+    async function (req, res, next) {
+        const { id } = req.params;
 
         defaultResponseHandler({
+            zodSchema: z.object({
+                params: z.object({
+                    id: z.number(),
+                }),
+            }),
             getResult: ProductService.deleteById,
             args: [id],
+            req,
             res,
             next,
-            validators: [validateVars([id], ["number"])],
         });
     }
 );
 
 export { ProductRouter };
+

@@ -1,58 +1,43 @@
 import express from "express";
 import { AuthMiddleware } from "middlewares/AuthMiddleware";
-import { AuthService, User } from "services/AuthService";
-import { RequestWithBody } from "types/requestTypes";
+import { AuthService } from "services/AuthService";
+import { ReturnToController } from "types/requestTypes";
 import { defaultResponseHandler } from "utils/defaultResponseHandler";
-import { validateVars } from "utils/validations";
-
-export interface UserCreateBody {
-    name: string;
-    password: string;
-}
-export interface UserLoginBody {
-    name: string;
-    password: string;
-}
-
-export interface UserDeleteBody {
-    user: User;
-    password: string;
-}
-
-export interface UserChangePasswordBody {
-    user: User;
-    oldPassword: string;
-    newPassword: string;
-}
-export interface UserChangeNameBody {
-    user: User;
-}
+import { z } from "zod";
 
 const AuthRouter = express.Router();
-AuthRouter.post(
-    "/register",
-    async function (req: RequestWithBody<UserCreateBody>, res, next) {
-        const { name, password } = req.body;
-        defaultResponseHandler<
-            { access: string; refresh: string },
-            { access: string }
-        >({
-            getResult: AuthService.register,
-            args: [name, password],
-            middleware: (result) => {
-                res.setHeader(
-                    "Set-Cookie",
-                    `refresh=${result.data.refresh}; HttpOnly`
-                );
-                delete result.data.refresh;
-                return result;
-            },
-            res,
-            next,
-            validators: [validateVars([name, password], ["string", "string"])],
-        });
-    }
-);
+AuthRouter.post("/register", async function (req, res, next) {
+    const { name, password } = req.body;
+    defaultResponseHandler<
+        { access: string; refresh: string },
+        { access: string }
+    >({
+        zodSchema: z.object({
+            body: z.object({
+                name: z.string(),
+                password: z.string(),
+            }),
+        }),
+        getResult: AuthService.register,
+        args: [name, password],
+        middleware: (result) => {
+            res.setHeader(
+                "Set-Cookie",
+                `refresh=${result.data?.refresh}; HttpOnly`
+            );
+            return {
+                code: result.code,
+                data: {
+                    // @ts-expect-error
+                    access: result.data.access,
+                },
+            };
+        },
+        req,
+        res,
+        next,
+    });
+});
 
 AuthRouter.post("/updateToken", async function (req, res, next) {
     defaultResponseHandler<
@@ -64,11 +49,14 @@ AuthRouter.post("/updateToken", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
+                // @ts-ignore
                 `refresh=${result.data.refresh}; HttpOnly`
             );
+            // @ts-ignore
             delete result.data.refresh;
             return result;
         },
+        req,
         res,
         next,
     });
@@ -77,102 +65,113 @@ AuthRouter.post("/updateToken", async function (req, res, next) {
 AuthRouter.post(
     "/changePassword",
     AuthMiddleware,
-    async function (req: RequestWithBody<UserChangePasswordBody>, res, next) {
-        const { user, oldPassword, newPassword } = req.body;
+    async function (req, res, next) {
+        const { oldPassword, newPassword } = req.body;
+        const user = res.locals.user;
         defaultResponseHandler<
             { access: string; refresh: string },
             { access: string }
         >({
+            zodSchema: z.object({
+                body: z.object({
+                    oldPassword: z.string(),
+                    newPassword: z.string(),
+                }),
+            }),
             getResult: AuthService.changePassword,
             args: [user.id, oldPassword, newPassword],
             middleware: (result) => {
                 res.setHeader(
                     "Set-Cookie",
+                    // @ts-ignore
                     `refresh=${result.data.refresh}; HttpOnly`
                 );
+                // @ts-ignore
                 delete result.data.refresh;
                 return result;
             },
+            req,
             res,
             next,
-            validators: [
-                validateVars(
-                    [user.id, oldPassword, newPassword],
-                    ["number", "string", "string"]
-                ),
-            ],
         });
     }
 );
 
-AuthRouter.post(
-    "/changeName",
-    AuthMiddleware,
-    async function (req: RequestWithBody<UserChangeNameBody>, res, next) {
-        const { user } = req.body;
-        defaultResponseHandler<
-            { access: string; refresh: string },
-            { access: string }
-        >({
-            getResult: AuthService.changeName,
-            args: [user.id, user.name],
-            middleware: (result) => {
-                res.setHeader(
-                    "Set-Cookie",
-                    `refresh=${result.data.refresh}; HttpOnly`
-                );
-                delete result.data.refresh;
-                return result;
-            },
-            res,
-            next,
-            validators: [
-                validateVars([user.id, user.name], ["number", "string"]),
-            ],
-        });
-    }
-);
+AuthRouter.post("/changeName", AuthMiddleware, async function (req, res, next) {
+    const { newName } = req.body;
+    const user = res.locals.user;
+    defaultResponseHandler<
+        { access: string; refresh: string },
+        { access: string }
+    >({
+        zodSchema: z.object({
+            body: z.object({
+                newName: z.string(),
+            }),
+        }),
+        getResult: AuthService.changeName,
+        args: [user.id, newName],
+        middleware: (result) => {
+            res.setHeader(
+                "Set-Cookie",
+                // @ts-ignore
+                `refresh=${result.data.refresh}; HttpOnly`
+            );
+            // @ts-ignore
+            delete result.data.refresh;
+            return result;
+        },
+        req,
+        res,
+        next,
+    });
+});
 
-AuthRouter.post(
-    "/login",
-    async function (req: RequestWithBody<UserLoginBody>, res, next) {
-        const { name, password } = req.body;
-        defaultResponseHandler<
-            { access: string; refresh: string },
-            { access: string }
-        >({
-            getResult: AuthService.login,
-            args: [name, password],
-            middleware: (result) => {
-                res.setHeader(
-                    "Set-Cookie",
-                    `refresh=${result.data.refresh}; HttpOnly`
-                );
-                delete result.data.refresh;
-                return result;
-            },
-            res,
-            next,
-            validators: [validateVars([name, password], ["string", "string"])],
-        });
-    }
-);
+AuthRouter.post("/login", async function (req, res, next) {
+    const { name, password } = req.body;
+    defaultResponseHandler<
+        { access: string; refresh: string },
+        { access: string }
+    >({
+        zodSchema: z.object({
+            body: z.object({
+                name: z.string(),
+                password: z.string(),
+            }),
+        }),
+        getResult: AuthService.login,
+        args: [name, password],
+        middleware: (result) => {
+            res.setHeader(
+                "Set-Cookie",
+                // @ts-ignore
+                `refresh=${result.data.refresh}; HttpOnly`
+            );
+            // @ts-ignore
+            delete result.data.refresh;
+            return result;
+        },
+        req,
+        res,
+        next,
+    });
+});
 
-AuthRouter.post(
-    "/delete",
-    AuthMiddleware,
-    async function (req: RequestWithBody<UserDeleteBody>, res, next) {
-        const { user, password } = req.body;
-        defaultResponseHandler({
-            getResult: AuthService.deleteUser,
-            args: [user.id, password],
-            res,
-            next,
-            validators: [
-                validateVars([user.id, password], ["number", "string"]),
-            ],
-        });
-    }
-);
+AuthRouter.post("/delete", AuthMiddleware, async function (req, res, next) {
+    const { password } = req.body;
+    const user = res.locals.user;
+    defaultResponseHandler({
+        zodSchema: z.object({
+            body: z.object({
+                password: z.string(),
+            }),
+        }),
+        getResult: AuthService.deleteUser,
+        args: [user.id, password],
+        req,
+        res,
+        next,
+    });
+});
 
 export { AuthRouter };

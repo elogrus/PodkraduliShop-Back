@@ -1,29 +1,20 @@
 import { db } from "app";
 import { LIMIT_GET_PRODUCTS_LIST } from "config/main";
+import { Product, ProductAttribute, ProductImage } from "types/Product";
 import { ReturnToController } from "types/requestTypes";
 
-export type Product = {
-    id: number;
-    imageUrl: string;
-    title: string;
-    description: string;
-    price: number;
-    currency: string;
-    discount: number;
-    ownerId: number;
-};
-
 enum ProductQueries {
-    createProduct = `INSERT INTO products (imageURL,title,description,price,currency,discount,ownerId) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+    createProduct = `INSERT INTO products (ownerId, title, description, price, currency, discount, attributes, imagesURL) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
     getProduct = `SELECT * FROM products WHERE id=?;`,
     getProductList = `select * from products limit ?,?;`,
     updateProduct = `UPDATE products SET 
-        imageUrl=?,
         title=?,
         description=?,
         price=?,
         currency=?,
-        discount=?
+        discount=?,
+        attributes=?,
+        imagesURL=?
         WHERE id=? AND ownerId=?;`,
     deleteProductById = `DELETE FROM products WHERE id=?;`,
     deleteAllProducts = `DELETE FROM products WHERE ownerId=?;`,
@@ -31,22 +22,24 @@ enum ProductQueries {
 
 export class ProductService {
     static createProduct(
-        imageURL: string,
+        ownerId: number,
         title: string,
         description: string,
         price: number,
         currency: string,
         discount: number,
-        ownerId: number
+        attributes: ProductAttribute[],
+        imagesURL: ProductImage[]
     ): ReturnToController<string> {
         db.prepare(ProductQueries.createProduct).run(
-            imageURL,
+            ownerId,
             title,
             description,
             price,
             currency,
             discount,
-            ownerId
+            JSON.stringify(attributes),
+            JSON.stringify(imagesURL)
         );
         return {
             code: 200,
@@ -69,7 +62,10 @@ export class ProductService {
             data: result,
         };
     }
-    static selectList(start: number, count: number): ReturnToController<Product[]> {
+    static selectList(
+        start: number,
+        count: number
+    ): ReturnToController<Product[]> {
         const result = db
             .prepare<[number, number], Product>(ProductQueries.getProductList)
             .all(start, count);
@@ -86,26 +82,28 @@ export class ProductService {
         };
     }
     static update(
-        imageURL: string,
+        id: number,
+        ownerID: number,
         title: string,
         description: string,
         price: number,
         currency: string,
         discount: number,
-        id: number,
-        ownerId: number
+        attributes: ProductAttribute[],
+        imagesURL: ProductImage[]
     ): ReturnToController<string> {
         const result = db
             .prepare(ProductQueries.updateProduct)
             .run(
-                imageURL,
                 title,
                 description,
                 price,
                 currency,
                 discount,
+                JSON.stringify(attributes),
+                JSON.stringify(imagesURL),
                 id,
-                ownerId
+                ownerID
             );
         if (result.changes === 0)
             return {

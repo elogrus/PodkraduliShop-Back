@@ -1,12 +1,11 @@
 import { db } from "app";
 import bcrypt from "bcrypt";
 import { SALT } from "config/main";
-import { ReturnToController } from "types/requestTypes";
-import { TokenService } from "./TokenService";
-import { generateKey } from "crypto";
 import { ProductService } from "./ProductService";
+import { TokenService } from "./TokenService";
+import { ReturnToController } from "types/requestTypes";
 
-export type User = {
+type DBUser = {
     id: number;
     name: string;
     passwordHash: string;
@@ -27,7 +26,7 @@ enum AuthQueries {
 
 export class AuthService {
     static updateToken(
-        refreshToken
+        refreshToken: string
     ): ReturnToController<{ access: string; refresh: string }> {
         const user = TokenService.validateRefreshToken(refreshToken);
         if (!user) {
@@ -64,11 +63,14 @@ export class AuthService {
         db.prepare(AuthQueries.createUser).run(name, passwordHash);
 
         const createdUser = db
-            .prepare<string, User>(AuthQueries.getAllByName)
+            .prepare<string, DBUser>(AuthQueries.getAllByName)
             .get(name);
         const token = TokenService.generateTokens({
+            //@ts-expect-error
             id: createdUser.id,
+            //@ts-expect-error
             name: createdUser.name,
+            //@ts-expect-error
             role: createdUser.role,
         });
 
@@ -104,11 +106,14 @@ export class AuthService {
             };
 
         const user = db
-            .prepare<string, User>(AuthQueries.getAllByName)
+            .prepare<string, DBUser>(AuthQueries.getAllByName)
             .get(name);
         const tokens = TokenService.generateTokens({
+            //@ts-expect-error
             id: user.id,
+            //@ts-expect-error
             name: user.name,
+            //@ts-expect-error
             role: user.role,
         });
 
@@ -126,7 +131,7 @@ export class AuthService {
         oldPassword: string,
         newPassword: string
     ): ReturnToController<{ access: string; refresh: string }> {
-        const user = db.prepare<number, User>(AuthQueries.getAllById).get(id);
+        const user = db.prepare<number, DBUser>(AuthQueries.getAllById).get(id);
         if (!user) {
             return {
                 code: 404,
@@ -159,7 +164,7 @@ export class AuthService {
         id: number,
         newName: string
     ): ReturnToController<{ access: string; refresh: string }> {
-        const user = db.prepare<number, User>(AuthQueries.getAllById).get(id);
+        const user = db.prepare<number, DBUser>(AuthQueries.getAllById).get(id);
         if (!user) {
             return {
                 code: 404,
@@ -181,7 +186,10 @@ export class AuthService {
         };
     }
 
-    static deleteUser(id: number, password: string): ReturnToController<string> {
+    static deleteUser(
+        id: number,
+        password: string
+    ): ReturnToController<string> {
         const result = db
             .prepare<number, { passwordHash: string }>(
                 AuthQueries.getPasswordById

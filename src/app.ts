@@ -13,15 +13,24 @@ import { DB_PATH, SERVER_IP, SERVER_PORT } from "config/main";
 import { AuthRouter } from "controllers/AuthController";
 import { ProductRouter } from "controllers/ProductController";
 import cookieParser from "cookie-parser";
-import express from "express";
+import cors from "cors";
+import express, {
+    NextFunction,
+    Request,
+    RequestHandler,
+    Response,
+} from "express";
+const { json } = require("body-parser");
 
 const app = express();
 
 export const db = new Database(DB_PATH);
 // FOR DEBUG
 // export const db = new Database(DB_PATH, { verbose: console.log });
-
-app.use(express.json());
+app.use(cors());
+// app.use(express.json());
+// JSON error handler
+app.use(json());
 app.use(cookieParser());
 app.use("/product", ProductRouter);
 app.use("/auth", AuthRouter);
