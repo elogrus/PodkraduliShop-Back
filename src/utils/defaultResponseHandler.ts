@@ -24,33 +24,26 @@ export function defaultResponseHandler<T, N>(options: Args<T, N>) {
                 });
             }
         }
-
-        // I duplicate the code because I couldn’t find solution so that typescript does not swear
-        if (middleware) {
-            const result = middleware(getResult(...args));
-            res.statusCode = result.code;
-            if (result.error) {
-                res.send({
-                    error: result.error,
-                });
-            }
+        const result = getResult(...args);
+        res.statusCode = result.code;
+        if (result.error) {
             res.send({
-                data: result.data,
+                error: result.error,
             });
-            next();
-        } else {
-            const result = getResult(...args);
-            res.statusCode = result.code;
-            if (result.error) {
-                res.send({
-                    error: result.error,
-                });
-            }
-            res.send({
-                data: result.data,
-            });
-            next();
+            return;
         }
+        if (middleware) {
+            const middlewareResult = middleware(result);
+            res.send({
+                data: middlewareResult.data,
+            });
+            return;
+        } else {
+            res.send({
+                data: result.data,
+            });
+        }
+        next();
     } catch (error) {
         console.error(error);
         res.statusCode = 500;

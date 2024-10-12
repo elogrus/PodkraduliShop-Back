@@ -1,7 +1,6 @@
 import express from "express";
 import { AuthMiddleware } from "middlewares/AuthMiddleware";
 import { AuthService } from "services/AuthService";
-import { ReturnToController } from "types/requestTypes";
 import { defaultResponseHandler } from "utils/defaultResponseHandler";
 import { z } from "zod";
 
@@ -49,12 +48,15 @@ AuthRouter.post("/updateToken", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                // @ts-ignore
-                `refresh=${result.data.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly`
             );
-            // @ts-ignore
-            delete result.data.refresh;
-            return result;
+            return {
+                code: result.code,
+                data: {
+                    // @ts-expect-error
+                    access: result.data.access,
+                },
+            };
         },
         req,
         res,
@@ -83,12 +85,15 @@ AuthRouter.post(
             middleware: (result) => {
                 res.setHeader(
                     "Set-Cookie",
-                    // @ts-ignore
-                    `refresh=${result.data.refresh}; HttpOnly`
+                    `refresh=${result?.data?.refresh}; HttpOnly`
                 );
-                // @ts-ignore
-                delete result.data.refresh;
-                return result;
+                return {
+                    code: result.code,
+                    data: {
+                        // @ts-expect-error
+                        access: result.data.access,
+                    },
+                };
             },
             req,
             res,
@@ -114,12 +119,15 @@ AuthRouter.post("/changeName", AuthMiddleware, async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                // @ts-ignore
-                `refresh=${result.data.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly`
             );
-            // @ts-ignore
-            delete result.data.refresh;
-            return result;
+            return {
+                code: result.code,
+                data: {
+                    // @ts-expect-error
+                    access: result.data.access,
+                },
+            };
         },
         req,
         res,
@@ -144,17 +152,26 @@ AuthRouter.post("/login", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                // @ts-ignore
-                `refresh=${result.data.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly`
             );
-            // @ts-ignore
-            delete result.data.refresh;
-            return result;
+            return {
+                code: result.code,
+                data: {
+                    // @ts-expect-error
+                    access: result.data.access,
+                },
+            };
         },
         req,
         res,
         next,
     });
+});
+
+AuthRouter.post("/logout", async function (req, res, next) {
+    res.clearCookie('refresh');
+    res.statusCode = 200
+    res.send()
 });
 
 AuthRouter.post("/delete", AuthMiddleware, async function (req, res, next) {

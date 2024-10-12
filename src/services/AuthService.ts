@@ -92,7 +92,6 @@ export class AuthService {
                 AuthQueries.getPasswordByName
             )
             .get(name);
-
         if (!result)
             return {
                 code: 404,
