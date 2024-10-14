@@ -1,24 +1,8 @@
 import { db } from "app";
 import { LIMIT_GET_PRODUCTS_LIST } from "config/main";
+import { ProductQueries } from "DbQueries/ProductQueries";
 import { Product, ProductAttribute, ProductImage } from "types/Product";
 import { ReturnToController } from "types/requestTypes";
-
-enum ProductQueries {
-    createProduct = `INSERT INTO products (ownerId, title, description, price, currency, discount, attributes, imagesURL) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-    getProduct = `SELECT * FROM products WHERE id=?;`,
-    getProductList = `select * from products limit ?,?;`,
-    updateProduct = `UPDATE products SET 
-        title=?,
-        description=?,
-        price=?,
-        currency=?,
-        discount=?,
-        attributes=?,
-        imagesURL=?
-        WHERE id=? AND ownerId=?;`,
-    deleteProductById = `DELETE FROM products WHERE id=?;`,
-    deleteAllProducts = `DELETE FROM products WHERE ownerId=?;`,
-}
 
 export class ProductService {
     static createProduct(

@@ -56,8 +56,7 @@ ProductRouter.post("/create", AuthMiddleware, async function (req, res, next) {
 });
 
 ProductRouter.get("/selectById/:id", async function (req, res, next) {
-    const { id } = req.params;
-    console.log(id);
+    const { id } = req.params; 
     defaultResponseHandler({
         zodSchema: z.object({
             params: z.object({
@@ -164,4 +163,3 @@ ProductRouter.post(
 );
 
 export { ProductRouter };
-

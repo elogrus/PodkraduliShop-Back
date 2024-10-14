@@ -5,12 +5,9 @@ import {
     JWT_REFRESH_SECRET_KEY,
 } from "config/main";
 import jwt from "jsonwebtoken";
+import { User } from "types/User";
 
-export type JwtPayload = {
-    id: number;
-    name: string;
-    role: string;
-};
+export interface JwtPayload extends User {}
 
 export class TokenService {
     static generateTokens(payload: JwtPayload): {

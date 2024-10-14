@@ -12,28 +12,38 @@ import Database from "better-sqlite3";
 import { DB_PATH, SERVER_IP, SERVER_PORT } from "config/main";
 import { AuthRouter } from "controllers/AuthController";
 import { ProductRouter } from "controllers/ProductController";
+import { UserRouter } from "controllers/UserController";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express, {
-    NextFunction,
-    Request,
-    RequestHandler,
-    Response,
-} from "express";
-const { json } = require("body-parser");
+import express from "express";
 
 const app = express();
 
-export const db = new Database(DB_PATH);
 // FOR DEBUG
 // export const db = new Database(DB_PATH, { verbose: console.log });
+export const db = new Database(DB_PATH);
+
 app.use(cors());
-// app.use(express.json());
+app.use((req, res, next) => {
+    console.log(req.originalUrl);
+    next();
+});
+app.use(express.json());
+
 // JSON error handler
-app.use(json());
+// @ts-ignore
+app.use((err, req, res, next) => {
+    // @ts-ignore
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        res.status(400).send({ error: "Bad JSON" });
+        return;
+    }
+    next();
+});
 app.use(cookieParser());
 app.use("/product", ProductRouter);
 app.use("/auth", AuthRouter);
+app.use("/user", UserRouter);
 
 app.listen(SERVER_PORT, SERVER_IP, () => {
     console.log(`Приложение запущено на: ${SERVER_IP}:${SERVER_PORT}`);

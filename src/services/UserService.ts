@@ -1,30 +1,31 @@
 import { db } from "app";
 import bcrypt from "bcrypt";
 import { SALT } from "config/main";
+import { UserQueries } from "DbQueries/UserQueries";
+import { ReturnToController } from "types/requestTypes";
+import { DBUser, User } from "types/User";
 import { ProductService } from "./ProductService";
 import { TokenService } from "./TokenService";
-import { ReturnToController } from "types/requestTypes";
 
-type DBUser = {
-    id: number;
-    name: string;
-    passwordHash: string;
-    role: string;
-};
+export class UserService {
+    static getUser(id: number): ReturnToController<User> {
+        const user = db.prepare<number, DBUser>(UserQueries.getAllById).get(id);
+        if (!user)
+            return {
+                code: 400,
+                error: "Такого пользователя не существует",
+            };
 
-enum AuthQueries {
-    createUser = `INSERT INTO users (name, passwordHash) VALUES (?, ?);`,
-    changePassword = `UPDATE users SET passwordHash=? WHERE id=?;`,
-    changeName = `UPDATE users SET name=? WHERE id=?;`,
-    delete = `DELETE FROM users WHERE id=?;`,
-    getAllById = `SELECT * FROM users WHERE "id"=?;`,
-    getPasswordById = `SELECT passwordHash FROM users WHERE "id"=?;`,
-    getPasswordByName = `SELECT passwordHash FROM users WHERE "name"=?;`,
-    getNameById = `SELECT name FROM users WHERE "id"=?;`,
-    getAllByName = `SELECT * FROM users WHERE "name"=?;`,
-}
+        return {
+            code: 200,
+            data: {
+                id: user.id,
+                name: user.name,
+                role: user.role,
+            },
+        };
+    }
 
-export class AuthService {
     static updateToken(
         refreshToken: string
     ): ReturnToController<{ access: string; refresh: string }> {
@@ -52,7 +53,7 @@ export class AuthService {
         name: string,
         password: string
     ): ReturnToController<{ access: string; refresh: string }> {
-        const existAuth = db.prepare(AuthQueries.getAllByName).get(name);
+        const existAuth = db.prepare(UserQueries.getAllByName).get(name);
         if (existAuth)
             return {
                 code: 400,
@@ -60,10 +61,10 @@ export class AuthService {
             };
 
         const passwordHash = bcrypt.hashSync(password, SALT);
-        db.prepare(AuthQueries.createUser).run(name, passwordHash);
+        db.prepare(UserQueries.createUser).run(name, passwordHash);
 
         const createdUser = db
-            .prepare<string, DBUser>(AuthQueries.getAllByName)
+            .prepare<string, DBUser>(UserQueries.getAllByName)
             .get(name);
         const token = TokenService.generateTokens({
             //@ts-expect-error
@@ -72,6 +73,8 @@ export class AuthService {
             name: createdUser.name,
             //@ts-expect-error
             role: createdUser.role,
+            //@ts-expect-error
+            avatarURL: createdUser.avatarURL,
         });
 
         return {
@@ -89,7 +92,7 @@ export class AuthService {
     ): ReturnToController<{ access: string; refresh: string }> {
         const result = db
             .prepare<string, { passwordHash: string }>(
-                AuthQueries.getPasswordByName
+                UserQueries.getPasswordByName
             )
             .get(name);
         if (!result)
@@ -103,9 +106,8 @@ export class AuthService {
                 code: 403,
                 error: "Неправильный пароль",
             };
-
         const user = db
-            .prepare<string, DBUser>(AuthQueries.getAllByName)
+            .prepare<string, DBUser>(UserQueries.getAllByName)
             .get(name);
         const tokens = TokenService.generateTokens({
             //@ts-expect-error
@@ -130,7 +132,7 @@ export class AuthService {
         oldPassword: string,
         newPassword: string
     ): ReturnToController<{ access: string; refresh: string }> {
-        const user = db.prepare<number, DBUser>(AuthQueries.getAllById).get(id);
+        const user = db.prepare<number, DBUser>(UserQueries.getAllById).get(id);
         if (!user) {
             return {
                 code: 404,
@@ -144,7 +146,7 @@ export class AuthService {
             };
 
         const newPasswordHash = bcrypt.hashSync(newPassword, SALT);
-        db.prepare(AuthQueries.changePassword).run(newPasswordHash, id);
+        db.prepare(UserQueries.changePassword).run(newPasswordHash, id);
         const tokens = TokenService.generateTokens({
             id: id,
             name: user.name,
@@ -163,14 +165,14 @@ export class AuthService {
         id: number,
         newName: string
     ): ReturnToController<{ access: string; refresh: string }> {
-        const user = db.prepare<number, DBUser>(AuthQueries.getAllById).get(id);
+        const user = db.prepare<number, DBUser>(UserQueries.getAllById).get(id);
         if (!user) {
             return {
                 code: 404,
                 error: "Пользователя с таким ID не существует",
             };
         }
-        db.prepare(AuthQueries.changeName).run(newName, id);
+        db.prepare(UserQueries.changeName).run(newName, id);
         const tokens = TokenService.generateTokens({
             id: id,
             name: newName,
@@ -191,7 +193,7 @@ export class AuthService {
     ): ReturnToController<string> {
         const result = db
             .prepare<number, { passwordHash: string }>(
-                AuthQueries.getPasswordById
+                UserQueries.getPasswordById
             )
             .get(id);
 
@@ -207,7 +209,7 @@ export class AuthService {
             };
 
         ProductService.deleteAllByOwnerId(id);
-        db.prepare(AuthQueries.delete).run(id);
+        db.prepare(UserQueries.delete).run(id);
         return {
             code: 200,
             data: "Пользователь и все его товары были удалены",
