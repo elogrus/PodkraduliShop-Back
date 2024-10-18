@@ -16,6 +16,7 @@ import { UserRouter } from "controllers/UserController";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import fileUpload from "express-fileupload";
 
 const app = express();
 
@@ -27,6 +28,15 @@ app.use(
     cors({
         origin: CORS_ORIGIN,
         credentials: true,
+    })
+);
+app.use(
+    fileUpload({
+        limits: { fileSize: 5 * 1024 * 1024 },
+        abortOnLimit: true,
+        createParentPath: true,
+        defCharset: "utf8",
+        defParamCharset: "utf8",
     })
 );
 app.use((req, res, next) => {

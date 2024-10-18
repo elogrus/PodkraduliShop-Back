@@ -8,13 +8,19 @@
     "license": "ISC",
     "description": "PodkraduliShop - shoes shop",
     "dependencies": {
+        "@types/express-fileupload": "^1.5.1",
+        "@types/mkdirp": "^1.0.2",
+        "@types/sharp": "^0.31.1",
         "bcrypt": "^5.1.1",
         "better-sqlite3": "^11.3.0",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "express": "^4.21.0",
+        "express-fileupload": "^1.5.1",
         "fs": "^0.0.1-security",
         "jsonwebtoken": "^9.0.2",
+        "mkdirp": "^3.0.1",
+        "sharp": "^0.33.5",
         "zod-express-middleware": "^1.4.0"
     },
     "devDependencies": {

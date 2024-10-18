@@ -10,3 +10,6 @@ export const JWT_ACCESS_EXPIRES = "10m";
 export const JWT_REFRESH_EXPIRES = "2d";
 // frontend address
 export const CORS_ORIGIN = "http://localhost.hehe:8080";
+
+export const AVATAR_PATH = 'uploads/avatars/'
+export const PRODUCT_IMAGES_PATH = 'uploads/productImages/'

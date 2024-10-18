@@ -1,7 +1,7 @@
 import { db } from "app";
 import { LIMIT_GET_PRODUCTS_LIST } from "config/main";
 import { ProductQueries } from "DbQueries/ProductQueries";
-import { Product, ProductAttribute, ProductImage } from "types/Product";
+import { Product, ProductAttribute } from "types/Product";
 import { ReturnToController } from "types/requestTypes";
 
 export class ProductService {
@@ -13,7 +13,7 @@ export class ProductService {
         currency: string,
         discount: number,
         attributes: ProductAttribute[],
-        imagesURL: ProductImage[]
+        imagesCount: number
     ): ReturnToController<string> {
         db.prepare(ProductQueries.createProduct).run(
             ownerId,
@@ -23,7 +23,7 @@ export class ProductService {
             currency,
             discount,
             JSON.stringify(attributes),
-            JSON.stringify(imagesURL)
+            imagesCount
         );
         return {
             code: 200,
@@ -74,7 +74,7 @@ export class ProductService {
         currency: string,
         discount: number,
         attributes: ProductAttribute[],
-        imagesURL: ProductImage[]
+        imagesCount: number
     ): ReturnToController<string> {
         const result = db
             .prepare(ProductQueries.updateProduct)
@@ -85,9 +85,8 @@ export class ProductService {
                 currency,
                 discount,
                 JSON.stringify(attributes),
-                JSON.stringify(imagesURL),
+                imagesCount,
                 id,
-                ownerID
             );
         if (result.changes === 0)
             return {

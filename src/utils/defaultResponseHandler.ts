@@ -22,6 +22,7 @@ export function defaultResponseHandler<T, N>(options: Args<T, N>) {
                 res.send({
                     error: "Invalid data",
                 });
+                return
             }
         }
         const result = getResult(...args);

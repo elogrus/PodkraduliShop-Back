@@ -22,6 +22,7 @@ export class UserService {
                 id: user.id,
                 name: user.name,
                 role: user.role,
+                about: user.about,
             },
         };
     }
@@ -40,6 +41,7 @@ export class UserService {
             id: user.id,
             name: user.name,
             role: user.role,
+            about: user.about,
         });
         return {
             code: 201,
@@ -116,6 +118,8 @@ export class UserService {
             name: user.name,
             //@ts-expect-error
             role: user.role,
+            //@ts-expect-error
+            about: user.about,
         });
 
         return {
@@ -151,6 +155,7 @@ export class UserService {
             id: id,
             name: user.name,
             role: user.role,
+            about: user.about,
         });
         return {
             code: 200,
@@ -187,6 +192,35 @@ export class UserService {
             id: id,
             name: newName,
             role: user.role,
+            about: user.about,
+        });
+        return {
+            code: 200,
+            data: {
+                access: tokens.accessToken,
+                refresh: tokens.refreshToken,
+            },
+        };
+    }
+
+    static changeAbout(
+        id: number,
+        about: string
+    ): ReturnToController<{ access: string; refresh: string }> {
+        const user = db.prepare<number, DBUser>(UserQueries.getAllById).get(id);
+        if (!user) {
+            return {
+                code: 404,
+                error: "Пользователя с таким ID не существует",
+            };
+        }
+
+        db.prepare(UserQueries.changeAbout).run(about, id);
+        const tokens = TokenService.generateTokens({
+            id: id,
+            name: user.name,
+            role: user.role,
+            about: about,
         });
         return {
             code: 200,

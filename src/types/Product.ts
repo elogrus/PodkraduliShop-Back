@@ -6,16 +6,10 @@ export type Product = {
     currency: string;
     discount: number;
     attributes: ProductAttribute[];
-    imagesUrl: ProductImage[];
-    ownerId: number;
+    imageCount: number;
 };
 
 export interface ProductAttribute {
     title: string;
     value: string | number | boolean;
-}
-
-export interface ProductImage {
-    imageURL: string;
-    miniURL?: string;
 }
