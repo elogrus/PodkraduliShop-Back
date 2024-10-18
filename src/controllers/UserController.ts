@@ -1,12 +1,12 @@
 import express from "express";
+import fs from "fs";
 import { AuthMiddleware } from "middlewares/AuthMiddleware";
 import path from "path";
 import { UserService } from "services/UserService";
+import { Stream } from "stream";
 import { User } from "types/User";
 import { defaultResponseHandler } from "utils/defaultResponseHandler";
 import { z } from "zod";
-import fs from "fs";
-import { Stream } from "stream";
 
 const UserRouter = express.Router();
 
@@ -44,7 +44,7 @@ UserRouter.post("/changeName", AuthMiddleware, async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                `refresh=${result?.data?.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly; SameSite=None; Secure`
             );
             return {
                 code: result.code,
@@ -81,7 +81,7 @@ UserRouter.post(
             middleware: (result) => {
                 res.setHeader(
                     "Set-Cookie",
-                    `refresh=${result?.data?.refresh}; HttpOnly`
+                    `refresh=${result?.data?.refresh}; HttpOnly; SameSite=None; Secure`
                 );
                 return {
                     code: result.code,
@@ -157,3 +157,4 @@ UserRouter.get("/avatar/:userId", async function (req, res, next) {
 });
 
 export { UserRouter };
+

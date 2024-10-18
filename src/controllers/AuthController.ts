@@ -21,7 +21,7 @@ AuthRouter.post("/register", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                `refresh=${result.data?.refresh}; HttpOnly`
+                `refresh=${result.data?.refresh}; HttpOnly; SameSite=None; Secure`
             );
             return {
                 code: result.code,
@@ -47,7 +47,7 @@ AuthRouter.post("/updateToken", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                `refresh=${result?.data?.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly; SameSite=None; Secure`
             );
             return {
                 code: result.code,
@@ -80,7 +80,7 @@ AuthRouter.post("/login", async function (req, res, next) {
         middleware: (result) => {
             res.setHeader(
                 "Set-Cookie",
-                `refresh=${result?.data?.refresh}; HttpOnly`
+                `refresh=${result?.data?.refresh}; HttpOnly; SameSite=None; Secure`
             );
             return {
                 code: result.code,

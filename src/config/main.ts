@@ -8,3 +8,5 @@ export const SALT = 5;
 export const LIMIT_GET_PRODUCTS_LIST = 20;
 export const JWT_ACCESS_EXPIRES = "10m";
 export const JWT_REFRESH_EXPIRES = "2d";
+// frontend address
+export const CORS_ORIGIN = "http://localhost.hehe:8080";

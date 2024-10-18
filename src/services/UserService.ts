@@ -33,7 +33,7 @@ export class UserService {
         if (!user) {
             return {
                 code: 401,
-                error: "Недействительный JWT",
+                error: "Недействительный JWT-Refresh",
             };
         }
         const token = TokenService.generateTokens({
@@ -170,6 +170,16 @@ export class UserService {
             return {
                 code: 404,
                 error: "Пользователя с таким ID не существует",
+            };
+        }
+
+        const candidate = db
+            .prepare<string, DBUser>(UserQueries.getAllByName)
+            .get(newName);
+        if (candidate) {
+            return {
+                code: 400,
+                error: "Пользователя с таким именем уже существует",
             };
         }
         db.prepare(UserQueries.changeName).run(newName, id);

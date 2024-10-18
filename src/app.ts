@@ -9,7 +9,7 @@
 // USER_COMMON_INFO_WITHOUT_ID = "http://localhost:3000/userinfo",
 
 import Database from "better-sqlite3";
-import { DB_PATH, SERVER_IP, SERVER_PORT } from "config/main";
+import { CORS_ORIGIN, DB_PATH, SERVER_IP, SERVER_PORT } from "config/main";
 import { AuthRouter } from "controllers/AuthController";
 import { ProductRouter } from "controllers/ProductController";
 import { UserRouter } from "controllers/UserController";
@@ -23,7 +23,12 @@ const app = express();
 // export const db = new Database(DB_PATH, { verbose: console.log });
 export const db = new Database(DB_PATH);
 
-app.use(cors());
+app.use(
+    cors({
+        origin: CORS_ORIGIN,
+        credentials: true,
+    })
+);
 app.use((req, res, next) => {
     console.log(req.originalUrl);
     next();
