@@ -11,6 +11,7 @@
 import Database from "better-sqlite3";
 import { CORS_ORIGIN, DB_PATH, SERVER_IP, SERVER_PORT } from "config/main";
 import { AuthRouter } from "controllers/AuthController";
+import { FavoritesRouter } from "controllers/FavoritesController";
 import { ProductRouter } from "controllers/ProductController";
 import { UserRouter } from "controllers/UserController";
 import cookieParser from "cookie-parser";
@@ -59,6 +60,7 @@ app.use(cookieParser());
 app.use("/product", ProductRouter);
 app.use("/auth", AuthRouter);
 app.use("/user", UserRouter);
+app.use("/favorites", FavoritesRouter);
 
 app.listen(SERVER_PORT, SERVER_IP, () => {
     console.log(`Приложение запущено на: ${SERVER_IP}:${SERVER_PORT}`);

@@ -12,5 +12,4 @@ export enum ProductQueries {
         imagesCount=?
         WHERE id=?;`,
     deleteProductById = `DELETE FROM products WHERE id=?;`,
-    deleteAllProducts = `DELETE FROM products WHERE ownerId=?;`,
 }

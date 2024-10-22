@@ -57,7 +57,7 @@ export class ProductService {
         if (count > LIMIT_GET_PRODUCTS_LIST)
             return {
                 code: 400,
-                error: "Слишком много товаров (максимум: 20)",
+                error: `Слишком много товаров (максимум: ${LIMIT_GET_PRODUCTS_LIST})`,
             };
 
         return {
@@ -86,7 +86,7 @@ export class ProductService {
                 discount,
                 JSON.stringify(attributes),
                 imagesCount,
-                id,
+                id
             );
         if (result.changes === 0)
             return {
@@ -110,13 +110,6 @@ export class ProductService {
         return {
             code: 200,
             data: "Товар был удален",
-        };
-    }
-    static deleteAllByOwnerId(id: number): ReturnToController<string> {
-        const result = db.prepare(ProductQueries.deleteAllProducts).run(id);
-        return {
-            code: 200,
-            data: "Все товары пользователя были удалены",
         };
     }
 }

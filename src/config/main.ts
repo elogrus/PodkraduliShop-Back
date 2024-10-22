@@ -6,6 +6,7 @@ export const JWT_ACCESS_SECRET_KEY = "JWTSecretKeyHehe";
 export const JWT_REFRESH_SECRET_KEY = "JWTRefreshSecretKeyHehe";
 export const SALT = 5;
 export const LIMIT_GET_PRODUCTS_LIST = 20;
+export const LIMIT_GET_FAVORITES_LIST = 20;
 export const JWT_ACCESS_EXPIRES = "10m";
 export const JWT_REFRESH_EXPIRES = "2d";
 // frontend address

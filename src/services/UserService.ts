@@ -252,7 +252,7 @@ export class UserService {
                 data: "Неправильный пароль",
             };
 
-        ProductService.deleteAllByOwnerId(id);
+        ProductService.deleteById(id);
         db.prepare(UserQueries.delete).run(id);
         return {
             code: 200,
