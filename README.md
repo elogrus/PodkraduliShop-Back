@@ -1,3 +1,4 @@
+RU
 PodkraduliShop - онлайн-каталог обуви.
 
 Frontend: https://github.com/elogrus/PodkraduliShop-Front
@@ -18,3 +19,23 @@ Frontend: https://github.com/elogrus/PodkraduliShop-Front
 · [JWT](https://jwt.io/) <br />
 · [ZOD](https://zod.dev/) <br />
 · [MVC](https://ru.wikipedia.org/wiki/Model-View-Controller) <br />
+
+
+EN
+PodkraduliShop - online shoe catalog.
+
+Frontend: https://github.com/elogrus/PodkraduliShop-Front
+
+The application has the following functions:<br />
+· Authorization (using JWT tokens)<br />
+· Password hashing<br />
+· Profile editing<br />
+· Viewing, creating, editing and deleting products<br />
+· Viewing, adding and deleting favorite products<br />
+· Uploading avatars and product images<br />
+
+Used in development: <br />
+· [Express](https://www.npmjs.com/package/express) <br />
+· [Bcrypt](https://www.npmjs.com/package/bcrypt) <br />
+· [TypeScript](https://www.typescriptlang.org/) <br />
+· [SQlite](https://www.sqlite.org/) <br /> · [JWT](https://jwt.io/) <br /> · [ZOD](https://zod.dev/) <br /> · [MVC](https://ru.wikipedia.org/wiki/Model-View-Controller) <br />
