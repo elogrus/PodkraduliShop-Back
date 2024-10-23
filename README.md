@@ -1,4 +1,4 @@
-RU
+[RU]
 PodkraduliShop - онлайн-каталог обуви.
 
 Frontend: https://github.com/elogrus/PodkraduliShop-Front
@@ -20,8 +20,9 @@ Frontend: https://github.com/elogrus/PodkraduliShop-Front
 · [ZOD](https://zod.dev/) <br />
 · [MVC](https://ru.wikipedia.org/wiki/Model-View-Controller) <br />
 
+<hr/>
 
-EN
+[EN]
 PodkraduliShop - online shoe catalog.
 
 Frontend: https://github.com/elogrus/PodkraduliShop-Front
