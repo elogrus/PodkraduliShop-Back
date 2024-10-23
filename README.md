@@ -16,5 +16,5 @@ Frontend: https://github.com/elogrus/PodkraduliShop-Front
 · [TypeScript](https://www.typescriptlang.org/) <br />
 · [SQlite](https://www.sqlite.org/) <br />
 · [JWT](https://jwt.io/) <br />
-· [ZOD]([https://feature-sliced.design/](https://zod.dev/)) <br />
+· [ZOD](https://zod.dev/) <br />
 · [MVC](https://ru.wikipedia.org/wiki/Model-View-Controller) <br />
